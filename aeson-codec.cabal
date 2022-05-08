@@ -32,10 +32,12 @@ common common
   default-extensions:
     , DerivingStrategies
     , DerivingVia
+    , ExistentialQuantification
     , GeneralizedNewtypeDeriving
     , ImportQualifiedPost
     , LambdaCase
     , OverloadedStrings
+    , RankNTypes
     , ScopedTypeVariables
     , TypeApplications
 
@@ -53,6 +55,7 @@ library
   hs-source-dirs:   src
   exposed-modules:
     , Data.Aeson.Decoder
+    , Data.Aeson.Encoder
 
   -- Modules included in this library but not exported.
   -- other-modules:
