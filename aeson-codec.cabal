@@ -30,6 +30,7 @@ common common
     -Wredundant-constraints
 
   default-extensions:
+    , DeriveFunctor
     , DerivingStrategies
     , DerivingVia
     , ExistentialQuantification
@@ -49,11 +50,13 @@ common common
     , bytestring >= 0.11.3.1
     , scientific >= 0.3.7.0
     , vector >= 0.12.3.1
+    , profunctors >= 5.6.2
 
 library
   import:           common
   hs-source-dirs:   src
   exposed-modules:
+    , Data.Aeson.Codec
     , Data.Aeson.Decoder
     , Data.Aeson.Encoder
 

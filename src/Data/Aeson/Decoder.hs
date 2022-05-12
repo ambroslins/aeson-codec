@@ -2,6 +2,7 @@ module Data.Aeson.Decoder
   ( Decoder,
     decoder,
     toParseJSON,
+    fromParseJSON,
     viaFromJSON,
     decode,
     object,
@@ -55,6 +56,9 @@ decoder :: (Value -> Result a) -> Decoder a
 decoder f = Decoder $ \v -> case f v of
   Error s -> fail s
   Success a -> pure a
+
+fromParseJSON :: (Value -> Parser a) -> Decoder a
+fromParseJSON = Decoder
 
 viaFromJSON :: Aeson.FromJSON a => Decoder a
 viaFromJSON = Decoder Aeson.parseJSON

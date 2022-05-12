@@ -119,6 +119,9 @@ maybeOrNull = maybe null
 
 data KeyValuePair a = forall b. KeyValuePair Key (Encoder b) (a -> Maybe b)
 
+instance Contravariant KeyValuePair where
+  contramap f (KeyValuePair key e g) = KeyValuePair key e (g . f)
+
 object :: forall a. [KeyValuePair a] -> Encoder a
 object kvs =
   Encoder
