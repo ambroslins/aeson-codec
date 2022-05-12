@@ -4,7 +4,7 @@ module Data.Aeson.Encoder
     toValue,
     toEncoding,
     encoder,
-    viaToJSON,
+    auto,
     array,
     text,
     string,
@@ -52,36 +52,36 @@ instance Contravariant Encoder where
 encoder :: (a -> Value) -> Encoder a
 encoder f = Encoder {toValue = f, toEncoding = Aeson.toEncoding . f}
 
-viaToJSON :: Aeson.ToJSON a => Encoder a
-viaToJSON =
+auto :: Aeson.ToJSON a => Encoder a
+auto =
   Encoder
     { toValue = Aeson.toJSON,
       toEncoding = Aeson.toEncoding
     }
 
 array :: Encoder Array
-array = viaToJSON
+array = auto
 
 text :: Encoder Text
-text = viaToJSON
+text = auto
 
 string :: Encoder String
-string = viaToJSON
+string = auto
 
 scientific :: Encoder Scientific
-scientific = viaToJSON
+scientific = auto
 
 int :: Encoder Int
-int = viaToJSON
+int = auto
 
 double :: Encoder Double
-double = viaToJSON
+double = auto
 
 float :: Encoder Float
-float = viaToJSON
+float = auto
 
 bool :: Encoder Bool
-bool = viaToJSON
+bool = auto
 
 null :: Encoder a
 null = Encoder {toValue = const Null, toEncoding = const Aeson.null_}

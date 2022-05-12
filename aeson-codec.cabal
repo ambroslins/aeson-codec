@@ -37,6 +37,7 @@ common common
     , GeneralizedNewtypeDeriving
     , ImportQualifiedPost
     , LambdaCase
+    , NamedFieldPuns
     , OverloadedStrings
     , RankNTypes
     , ScopedTypeVariables

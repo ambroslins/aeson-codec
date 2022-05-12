@@ -1,9 +1,7 @@
 module Data.Aeson.Decoder
-  ( Decoder,
+  ( Decoder (..),
     decoder,
-    toParseJSON,
-    fromParseJSON,
-    viaFromJSON,
+    auto,
     decode,
     object,
     array,
@@ -44,7 +42,7 @@ import Data.Vector (Vector)
 import Data.Vector qualified as Vector
 import Prelude hiding (null)
 
-newtype Decoder a = Decoder {toParseJSON :: Value -> Parser a}
+newtype Decoder a = Decoder {parseJSON :: Value -> Parser a}
   deriving
     (Functor, Applicative, Monad, Alternative, MonadFail)
     via (ReaderT Value Parser)
@@ -57,32 +55,29 @@ decoder f = Decoder $ \v -> case f v of
   Error s -> fail s
   Success a -> pure a
 
-fromParseJSON :: (Value -> Parser a) -> Decoder a
-fromParseJSON = Decoder
-
-viaFromJSON :: Aeson.FromJSON a => Decoder a
-viaFromJSON = Decoder Aeson.parseJSON
+auto :: Aeson.FromJSON a => Decoder a
+auto = Decoder Aeson.parseJSON
 
 object :: Decoder Object
-object = viaFromJSON
+object = auto
 
 array :: Decoder Array
-array = viaFromJSON
+array = auto
 
 text :: Decoder Text
-text = viaFromJSON
+text = auto
 
 string :: Decoder String
-string = viaFromJSON
+string = auto
 
 scientific :: Decoder Scientific
-scientific = viaFromJSON
+scientific = auto
 
 int :: Decoder Int
-int = viaFromJSON
+int = auto
 
 bool :: Decoder Bool
-bool = viaFromJSON
+bool = auto
 
 null :: Decoder ()
 null = Decoder $ \case

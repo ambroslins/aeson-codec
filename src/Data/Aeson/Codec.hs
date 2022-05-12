@@ -5,47 +5,60 @@ import Data.Aeson.Decoder (Decoder)
 import Data.Aeson.Decoder qualified as Decoder
 import Data.Aeson.Encoder (Encoder)
 import Data.Aeson.Encoder qualified as Encoder
-import Data.Aeson.Types (Object, Parser, Value (Object))
+import Data.Aeson.Types (Key, Object, Parser, Value (Object))
 import Data.Aeson.Types qualified as Aeson
 import Data.Functor.Contravariant (Contravariant (contramap))
-import Data.Profunctor (Profunctor (lmap, rmap))
+import Data.Profunctor (Profunctor (dimap))
 
 data Codec a = Codec
-  { decoder :: Decoder a,
-    encoder :: Encoder a
+  { encoder :: Encoder a,
+    decoder :: Decoder a
   }
 
-instanced :: (Aeson.FromJSON a, Aeson.ToJSON a) => Codec a
-instanced = Codec {decoder = Decoder.viaFromJSON, encoder = Encoder.viaToJSON}
+auto :: (Aeson.FromJSON a, Aeson.ToJSON a) => Codec a
+auto = Codec {encoder = Encoder.auto, decoder = Decoder.auto}
 
 data ObjectCodec a b = ObjectCodec
-  { objectDecoder :: Object -> Parser b,
-    objectEncoders :: [Encoder.KeyValuePair a]
+  { en :: [Encoder.KeyValuePair a],
+    de :: Object -> Parser b
   }
   deriving (Functor)
 
 instance Profunctor ObjectCodec where
-  lmap f oc = oc {objectEncoders = contramap f <$> objectEncoders oc}
-  rmap f oc = oc {objectDecoder = fmap f <$> objectDecoder oc}
+  dimap f g ObjectCodec {en, de} =
+    ObjectCodec
+      { en = contramap f <$> en,
+        de = fmap g <$> de
+      }
 
 instance Applicative (ObjectCodec a) where
-  pure x =
-    ObjectCodec
-      { objectDecoder = const (pure x),
-        objectEncoders = []
-      }
+  pure x = ObjectCodec {en = [], de = const (pure x)}
 
   f <*> k =
     ObjectCodec
-      { objectDecoder = ((<*>) . objectDecoder f) <*> objectDecoder k,
-        objectEncoders = objectEncoders f <> objectEncoders k
+      { en = en f <> en k,
+        de = ((<*>) . de f) <*> de k
       }
 
 object :: ObjectCodec a a -> Codec a
-object oc =
+object ObjectCodec {en, de} =
   Codec
-    { decoder = Decoder.fromParseJSON $ \case
-        Object o -> objectDecoder oc o
-        v -> Aeson.typeMismatch "Object" v,
-      encoder = Encoder.object $ objectEncoders oc
+    { encoder = Encoder.object en,
+      decoder = Decoder.Decoder $ \case
+        Object o -> de o
+        v -> Aeson.typeMismatch "Object" v
+    }
+
+field :: Key -> Codec b -> (a -> b) -> ObjectCodec a b
+field key Codec {encoder, decoder} f =
+  ObjectCodec
+    { en = [Encoder.field key encoder f],
+      de = \o -> Aeson.explicitParseField (Decoder.parseJSON decoder) o key
+    }
+
+optionalField :: Key -> Codec b -> (a -> Maybe b) -> ObjectCodec a (Maybe b)
+optionalField key Codec {encoder, decoder} f =
+  ObjectCodec
+    { en = [Encoder.optionalField key encoder f],
+      de = \o -> Aeson.explicitParseFieldMaybe (Decoder.parseJSON decoder) o key
     }
