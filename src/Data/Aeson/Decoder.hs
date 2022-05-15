@@ -17,6 +17,7 @@ module Data.Aeson.Decoder
     optionalField,
     vector,
     list,
+    generic,
   )
 where
 
@@ -40,6 +41,7 @@ import Data.Scientific (Scientific)
 import Data.Text (Text)
 import Data.Vector (Vector)
 import Data.Vector qualified as Vector
+import GHC.Generics (Generic (Rep))
 import Prelude hiding (null)
 
 newtype Decoder a = Decoder {parseJSON :: Value -> Parser a}
@@ -104,3 +106,6 @@ vector (Decoder d) = Decoder $ \case
 
 list :: Decoder a -> Decoder [a]
 list d = Vector.toList <$> vector d
+
+generic :: (Generic a, Aeson.GFromJSON Aeson.Zero (Rep a)) => Aeson.Options -> Decoder a
+generic = Decoder . Aeson.genericParseJSON

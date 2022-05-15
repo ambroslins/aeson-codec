@@ -9,6 +9,7 @@ import Data.Aeson.Types (Key, Object, Parser, Value (Object))
 import Data.Aeson.Types qualified as Aeson
 import Data.Functor.Contravariant (Contravariant (contramap))
 import Data.Profunctor (Profunctor (dimap))
+import GHC.Generics (Generic, Rep)
 
 data Codec a = Codec
   { encoder :: Encoder a,
@@ -17,6 +18,9 @@ data Codec a = Codec
 
 auto :: (Aeson.FromJSON a, Aeson.ToJSON a) => Codec a
 auto = Codec {encoder = Encoder.auto, decoder = Decoder.auto}
+
+codec :: Encoder a -> Decoder a -> Codec a
+codec = Codec
 
 data ObjectCodec a b = ObjectCodec
   { en :: [Encoder.KeyValuePair a],
@@ -62,3 +66,13 @@ optionalField key Codec {encoder, decoder} f =
     { en = [Encoder.optionalField key encoder f],
       de = \o -> Aeson.explicitParseFieldMaybe (Decoder.parseJSON decoder) o key
     }
+
+generic ::
+  ( Generic a,
+    Aeson.GToJSON' Aeson.Encoding Aeson.Zero (Rep a),
+    Aeson.GToJSON' Value Aeson.Zero (Rep a),
+    Aeson.GFromJSON Aeson.Zero (Rep a)
+  ) =>
+  Aeson.Options ->
+  Codec a
+generic options = Codec {encoder = Encoder.generic options, decoder = Decoder.generic options}

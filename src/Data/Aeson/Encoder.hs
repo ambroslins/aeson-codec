@@ -22,6 +22,7 @@ module Data.Aeson.Encoder
     object,
     field,
     optionalField,
+    generic,
   )
 where
 
@@ -34,6 +35,7 @@ import Data.Scientific (Scientific)
 import Data.Text (Text)
 import Data.Vector (Vector)
 import Data.Vector qualified as Vector
+import GHC.Generics (Generic (Rep))
 import Prelude hiding (either, maybe, null)
 import Prelude qualified
 
@@ -148,3 +150,16 @@ field k e f = KeyValuePair k e (Just . f)
 
 optionalField :: Key -> Encoder b -> (a -> Maybe b) -> KeyValuePair a
 optionalField = KeyValuePair
+
+generic ::
+  ( Generic a,
+    Aeson.GToJSON Aeson.Zero (Rep a),
+    Aeson.GToJSON' Aeson.Encoding Aeson.Zero (Rep a)
+  ) =>
+  Aeson.Options ->
+  Encoder a
+generic options =
+  Encoder
+    { toValue = Aeson.genericToJSON options,
+      toEncoding = Aeson.genericToEncoding options
+    }

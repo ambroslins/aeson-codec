@@ -34,6 +34,7 @@ common common
     , DerivingStrategies
     , DerivingVia
     , ExistentialQuantification
+    , FlexibleContexts
     , GeneralizedNewtypeDeriving
     , ImportQualifiedPost
     , LambdaCase
