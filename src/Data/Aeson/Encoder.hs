@@ -73,6 +73,9 @@ string = auto
 scientific :: Encoder Scientific
 scientific = auto
 
+-- | Encode an int
+-- >>> toValue int 42
+-- Number 42.0
 int :: Encoder Int
 int = auto
 
