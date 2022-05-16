@@ -1,4 +1,4 @@
-module Data.Aeson.Encoder
+module Data.Aeson.Encoder.Internal
   ( Encoder,
     KeyValuePair,
     toValue,

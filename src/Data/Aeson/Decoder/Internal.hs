@@ -1,4 +1,4 @@
-module Data.Aeson.Decoder
+module Data.Aeson.Decoder.Internal
   ( Decoder (..),
     decoder,
     auto,

@@ -1,10 +1,10 @@
-module Data.Aeson.Codec where
+module Data.Aeson.Codec.Internal where
 
 import Data.Aeson qualified as Aeson
-import Data.Aeson.Decoder (Decoder)
-import Data.Aeson.Decoder qualified as Decoder
-import Data.Aeson.Encoder (Encoder)
-import Data.Aeson.Encoder qualified as Encoder
+import Data.Aeson.Decoder.Internal (Decoder)
+import Data.Aeson.Decoder.Internal qualified as Decoder
+import Data.Aeson.Encoder.Internal (Encoder)
+import Data.Aeson.Encoder.Internal qualified as Encoder
 import Data.Aeson.Types (Key, Object, Parser, Value (Object))
 import Data.Aeson.Types qualified as Aeson
 import Data.Functor.Contravariant (Contravariant (contramap))
