@@ -1,0 +1,10 @@
+cradle:
+  cabal:
+    - path: "./src"
+      component: "lib:aeson-codec"
+
+    - path: "./test"
+      component: "aeson-codec:test:aeson-codec-test"
+
+    - path: "./test"
+      component: "aeson-codec:test:aeson-codec-doctest"
