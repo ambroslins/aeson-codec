@@ -59,6 +59,7 @@ library
   hs-source-dirs:   src
   exposed-modules:
     , Data.Aeson.Codec.Internal
+    , Data.Aeson.Decoder
     , Data.Aeson.Decoder.Internal
     , Data.Aeson.Encoder.Internal
 

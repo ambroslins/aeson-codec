@@ -1,8 +1,8 @@
 module Data.Aeson.Codec.Internal where
 
 import Data.Aeson qualified as Aeson
-import Data.Aeson.Decoder.Internal (Decoder)
-import Data.Aeson.Decoder.Internal qualified as Decoder
+import Data.Aeson.Decoder qualified as Decoder
+import Data.Aeson.Decoder.Internal (Decoder (..))
 import Data.Aeson.Encoder.Internal (Encoder)
 import Data.Aeson.Encoder.Internal qualified as Encoder
 import Data.Aeson.Types (Key, Object, Parser, Value (Object))
@@ -48,7 +48,7 @@ object :: ObjectCodec a a -> Codec a
 object ObjectCodec {en, de} =
   Codec
     { encoder = Encoder.object en,
-      decoder = Decoder.Decoder $ \case
+      decoder = Decoder $ \case
         Object o -> de o
         v -> Aeson.typeMismatch "Object" v
     }
@@ -75,4 +75,8 @@ generic ::
   ) =>
   Aeson.Options ->
   Codec a
-generic options = Codec {encoder = Encoder.generic options, decoder = Decoder.generic options}
+generic options =
+  Codec
+    { encoder = Encoder.generic options,
+      decoder = Decoder.genericWith options
+    }
