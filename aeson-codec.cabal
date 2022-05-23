@@ -61,6 +61,7 @@ library
     , Data.Aeson.Codec.Internal
     , Data.Aeson.Decoder
     , Data.Aeson.Decoder.Internal
+    , Data.Aeson.Encoder
     , Data.Aeson.Encoder.Internal
 
   -- Modules included in this library but not exported.
