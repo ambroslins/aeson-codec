@@ -2,6 +2,26 @@
 -- Stability: experimental
 --
 -- Functions and combinators for decoding JSON 'Value's into Haskell values.
+--
+-- It\'s recommended to import this module qualified,
+-- to avoid name clashes with "Prelude" functions.
+-- Here we will use this import scheme:
+--
+-- @
+-- {-# LANGUAGE ImportQualifiedPost #-}
+-- import Data.Aeson.Decoder (Decoder)
+-- import Data.Aeson.Decoder qualified as Decoder
+-- @
+--
+-- As an example consider the following data types:
+--
+-- @
+-- data Person = Person
+--   { name :: Text
+--   , age :: Int
+--   ,
+--   }
+-- @
 module Data.Aeson.Decoder
   ( -- * Decoder
     Decoder,
@@ -92,6 +112,11 @@ import GHC.Generics (Generic (Rep))
 import Numeric.Natural (Natural)
 import Prelude hiding (either, maybe, null)
 import Prelude qualified
+
+-- $setup
+-- >>> :m -Data.Aeson.Decoder
+-- >>> import Data.Aeson.Decoder (Decoder)
+-- >>> import Data.Aeson.Decoder qualified as Decoder
 
 -- | Construct a 'Decoder' from a function from a 'Value' to 'Result'.
 --
@@ -191,7 +216,7 @@ array = auto
 
 -- | Decode the value at the given 'Key'.
 --
--- >>> decodeByteString (field "foo" int) "{\"foo\": 42}"
+-- >>> Decoder.decodeByteString (Decoder.field "foo" Decoder.int) "{\"foo\": 42}"
 -- Success 42
 field :: Key -> Decoder a -> Decoder a
 field key (Decoder d) = Decoder $ \case

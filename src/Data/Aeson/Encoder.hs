@@ -47,6 +47,15 @@ module Data.Aeson.Encoder
     object,
     field,
     optionalField,
+
+    -- ** Arrays
+    list,
+    vector,
+
+    -- ** Alternatives
+    maybe,
+    maybeOrNull,
+    either,
   )
 where
 
@@ -176,14 +185,15 @@ array = auto
 --
 -- Consider the following data type and encoder:
 --
--- >>> :{ data Person = Person
---    { name :: String
---    , age :: Int
---    , email :: Maybe String
---    }
+-- >>> :{
+-- data Person = Person
+--   { name :: String
+--   , age :: Int
+--   , email :: Maybe String
+--   }
 -- :}
 --
--- > person = object [ field "name" string name, field "age" int age, optionalField "email" string email ]
+-- >>> person = object [ field "name" string name, field "age" int age, optionalField "email" string email ]
 --
 -- >>> encodeByteString person (Person "Naomi" 42 (Just "foo@bar.baz"))
 -- "{\"name\":\"Naomi\",\"age\":42,\"email\":\"foo@bar.baz\"}"
@@ -223,14 +233,6 @@ field k e f = KeyValuePair k e (Just . f)
 optionalField :: Key -> Encoder b -> (a -> Maybe b) -> KeyValuePair a
 optionalField = KeyValuePair
 
--- | Enocde a 'Vector' using the given 'Encoder.
-vector :: Encoder a -> Encoder (Vector a)
-vector e =
-  Encoder
-    { toValue = Array . Vector.map (toValue e),
-      toEncoding = Aeson.list (toEncoding e) . Vector.toList
-    }
-
 -- | Enocde a list using the given 'Encoder.
 list :: Encoder a -> Encoder [a]
 list e =
@@ -239,12 +241,12 @@ list e =
       toEncoding = Aeson.list (toEncoding e)
     }
 
--- | Encode an 'Either' value.
-either :: Encoder a -> Encoder b -> Encoder (Either a b)
-either l r =
+-- | Enocde a 'Vector' using the given 'Encoder.
+vector :: Encoder a -> Encoder (Vector a)
+vector e =
   Encoder
-    { toValue = Prelude.either (toValue l) (toValue r),
-      toEncoding = Prelude.either (toEncoding l) (toEncoding r)
+    { toValue = Array . Vector.map (toValue e),
+      toEncoding = Aeson.list (toEncoding e) . Vector.toList
     }
 
 -- | Encode a 'Maybe' value.
@@ -260,3 +262,11 @@ maybe eNothing eJust =
 -- @ maybeOrNull = maybe null @
 maybeOrNull :: Encoder a -> Encoder (Maybe a)
 maybeOrNull = maybe null
+
+-- | Encode an 'Either' value.
+either :: Encoder a -> Encoder b -> Encoder (Either a b)
+either l r =
+  Encoder
+    { toValue = Prelude.either (toValue l) (toValue r),
+      toEncoding = Prelude.either (toEncoding l) (toEncoding r)
+    }
