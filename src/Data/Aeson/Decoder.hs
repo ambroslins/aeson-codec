@@ -41,8 +41,7 @@
 -- Success (Person {name = "Naomi", age = 42, email = Just "foo@bar.baz"})
 module Data.Aeson.Decoder
   ( -- * Decoder
-    Decoder,
-    parseJSON,
+    Decoder (..),
 
     -- * Result
 
@@ -103,8 +102,8 @@ module Data.Aeson.Decoder
 where
 
 import Control.Applicative (Alternative ((<|>)), optional)
+import Control.Monad.Trans.Reader (ReaderT (..))
 import Data.Aeson qualified as Aeson
-import Data.Aeson.Decoder.Internal (Decoder (..))
 import Data.Aeson.Internal qualified as Aeson
 import Data.Aeson.Parser.Internal qualified as Aeson
 import Data.Aeson.Types
@@ -112,6 +111,7 @@ import Data.Aeson.Types
     JSONPathElement (Index),
     Key,
     Object,
+    Parser,
     Result (..),
     Value (..),
     (<?>),
@@ -134,6 +134,12 @@ import Prelude qualified
 -- >>> :m -Data.Aeson.Decoder
 -- >>> import Data.Aeson.Decoder (Decoder)
 -- >>> import Data.Aeson.Decoder qualified as Decoder
+
+-- | A value which can decode JSON 'Value's into Haskell values of type @a@.
+newtype Decoder a = Decoder {parseJSON :: Value -> Parser a}
+  deriving
+    (Functor, Applicative, Monad, Alternative, MonadFail)
+    via (ReaderT Value Parser)
 
 -- | Construct a 'Decoder' from a function from a 'Value' to 'Result'.
 --

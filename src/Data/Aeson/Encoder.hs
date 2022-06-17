@@ -41,7 +41,7 @@
 -- "{\"name\":\"Naomi\",\"age\":42,\"email\":\"foo@bar.baz\"}"
 module Data.Aeson.Encoder
   ( -- * Encoder
-    Encoder,
+    Encoder (..),
 
     -- * Construction
     encoder,
@@ -52,8 +52,6 @@ module Data.Aeson.Encoder
     -- * Runners
     encode,
     encodeByteString,
-    toValue,
-    toEncoding,
 
     -- * Primitives
     null,
@@ -97,11 +95,11 @@ module Data.Aeson.Encoder
   )
 where
 
-import Data.Aeson (Array, Key, Value (Array, Null))
+import Data.Aeson (Array, Encoding, Key, Value (Array, Null))
 import Data.Aeson qualified as Aeson
-import Data.Aeson.Encoder.Internal (Encoder (..), KeyValuePair (..))
 import Data.Aeson.Encoding qualified as Aeson
 import Data.ByteString.Lazy (ByteString)
+import Data.Functor.Contravariant (Contravariant (..))
 import Data.Maybe (mapMaybe)
 import Data.Scientific (Scientific)
 import Data.Text (Text)
@@ -116,6 +114,23 @@ import Prelude qualified
 -- >>> :m -Data.Aeson.Encoder
 -- >>> import Data.Aeson.Encoder (Encoder)
 -- >>> import Data.Aeson.Encoder qualified as Encoder
+
+data Encoder a = Encoder
+  { toValue :: a -> Value,
+    toEncoding :: a -> Encoding
+  }
+
+instance Contravariant Encoder where
+  contramap f e =
+    Encoder
+      { toValue = toValue e . f,
+        toEncoding = toEncoding e . f
+      }
+
+data KeyValuePair a = forall b. KeyValuePair Key (Encoder b) (a -> Maybe b)
+
+instance Contravariant KeyValuePair where
+  contramap f (KeyValuePair key e g) = KeyValuePair key e (g . f)
 
 -- | Construct a 'Encoder' from a function from 'a' to 'Value'.
 encoder :: (a -> Value) -> Encoder a

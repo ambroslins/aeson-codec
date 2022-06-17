@@ -58,11 +58,9 @@ library
   import:           common
   hs-source-dirs:   src
   exposed-modules:
-    , Data.Aeson.Codec.Internal
+    , Data.Aeson.Codec
     , Data.Aeson.Decoder
-    , Data.Aeson.Decoder.Internal
     , Data.Aeson.Encoder
-    , Data.Aeson.Encoder.Internal
 
   -- Modules included in this library but not exported.
   -- other-modules:
