@@ -2,6 +2,43 @@
 -- Stability: experimental
 --
 -- Functions and combinators for encoding Haskell values int JSON 'Value's.
+--
+-- It\'s recommended to import this module qualified,
+-- to avoid name clashes with "Prelude" functions.
+--
+-- Here we will use the following import scheme:
+--
+-- @
+-- {-# LANGUAGE ImportQualifiedPost #-}
+-- import Data.Aeson.Encoder (Encoder)
+-- import Data.Aeson.Encoder qualified as Encoder
+-- @
+--
+-- Consider the following data type:
+--
+-- >>> :{
+-- data Person = Person
+--   { name :: String
+--   , age :: Int
+--   , email :: Maybe String
+--   }
+-- :}
+--
+-- We could write an 'Encoder' for this type like this:
+--
+-- >>> :{
+-- person :: Encoder Person
+-- person = Encoder.object
+--   [ Encoder.field "name" Encoder.string name
+--   , Encoder.field "age" Encoder.int age
+--   , Encoder.optionalField "email" Encoder.string email
+--   ]
+-- :}
+--
+-- And we could use this 'Encoder' to encode some Person to a 'ByteString':
+--
+-- >>> Encoder.encodeByteString person (Person "Naomi" 42 (Just "foo@bar.baz"))
+-- "{\"name\":\"Naomi\",\"age\":42,\"email\":\"foo@bar.baz\"}"
 module Data.Aeson.Encoder
   ( -- * Encoder
     Encoder,
@@ -47,6 +84,7 @@ module Data.Aeson.Encoder
     object,
     field,
     optionalField,
+    constField,
 
     -- ** Arrays
     list,
@@ -73,6 +111,11 @@ import GHC.Generics (Generic (Rep))
 import Numeric.Natural (Natural)
 import Prelude hiding (either, maybe, null)
 import Prelude qualified
+
+-- $setup
+-- >>> :m -Data.Aeson.Encoder
+-- >>> import Data.Aeson.Encoder (Encoder)
+-- >>> import Data.Aeson.Encoder qualified as Encoder
 
 -- | Construct a 'Encoder' from a function from 'a' to 'Value'.
 encoder :: (a -> Value) -> Encoder a
@@ -182,21 +225,6 @@ array :: Encoder Array
 array = auto
 
 -- | Encode a List of 'KeyValuePair's as an 'Object'.
---
--- Consider the following data type and encoder:
---
--- >>> :{
--- data Person = Person
---   { name :: String
---   , age :: Int
---   , email :: Maybe String
---   }
--- :}
---
--- >>> person = object [ field "name" string name, field "age" int age, optionalField "email" string email ]
---
--- >>> encodeByteString person (Person "Naomi" 42 (Just "foo@bar.baz"))
--- "{\"name\":\"Naomi\",\"age\":42,\"email\":\"foo@bar.baz\"}"
 object :: forall a. [KeyValuePair a] -> Encoder a
 object kvs =
   Encoder
@@ -232,6 +260,9 @@ field k e f = KeyValuePair k e (Just . f)
 -- See 'object' for more information.
 optionalField :: Key -> Encoder b -> (a -> Maybe b) -> KeyValuePair a
 optionalField = KeyValuePair
+
+constField :: Key -> Encoder b -> b -> KeyValuePair a
+constField k e x = field k e (const x)
 
 -- | Enocde a list using the given 'Encoder.
 list :: Encoder a -> Encoder [a]

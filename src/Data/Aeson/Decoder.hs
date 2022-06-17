@@ -5,7 +5,8 @@
 --
 -- It\'s recommended to import this module qualified,
 -- to avoid name clashes with "Prelude" functions.
--- Here we will use this import scheme:
+--
+-- Here we will use the following import scheme:
 --
 -- @
 -- {-# LANGUAGE ImportQualifiedPost #-}
@@ -13,15 +14,31 @@
 -- import Data.Aeson.Decoder qualified as Decoder
 -- @
 --
--- As an example consider the following data types:
+-- Consider the following data type:
 --
--- @
+-- >>> :{
 -- data Person = Person
---   { name :: Text
+--   { name :: String
 --   , age :: Int
---   ,
+--   , email :: Maybe String
 --   }
--- @
+--   deriving (Show)
+-- :}
+--
+-- We could write an 'Decoder' for this type like this:
+--
+-- >>> :{
+-- person :: Decoder Person
+-- person = Person
+--   <$> Decoder.field "name" Decoder.string
+--   <*> Decoder.field "age" Decoder.int
+--   <*> Decoder.optionalField "email" Decoder.string
+-- :}
+--
+-- And we could use this 'Decoder' to decode a 'ByteString':
+--
+-- >>> Decoder.decodeByteString person "{\"name\":\"Naomi\",\"age\":42,\"email\":\"foo@bar.baz\"}"
+-- Success (Person {name = "Naomi", age = 42, email = Just "foo@bar.baz"})
 module Data.Aeson.Decoder
   ( -- * Decoder
     Decoder,
@@ -227,13 +244,15 @@ field key (Decoder d) = Decoder $ \case
 -- This will return 'Nothing' if the key is not present or if its value is 'Null.
 -- See '(Aeson..:?)' for more details.
 --
--- >>> decodeByteString (optionalField "foo" int) "{\"foo\": 42}"
+-- >>> let foo = Decoder.optionalField "foo" Decoder.int
+--
+-- >>> Decoder.decodeByteString foo "{\"foo\": 42}"
 -- Success (Just 42)
 --
--- >>> decodeByteString (optionalField "foo" int) "{\"foo\": null}"
+-- >>> Decoder.decodeByteString foo "{\"foo\": null}"
 -- Success Nothing
 --
--- >>> decodeByteString (optionalField "foo" int) "{\"bar\": false}"
+-- >>> Decoder.decodeByteString foo "{\"bar\": false}"
 -- Success Nothing
 optionalField :: Key -> Decoder a -> Decoder (Maybe a)
 optionalField key (Decoder d) = Decoder $ \case
@@ -242,7 +261,7 @@ optionalField key (Decoder d) = Decoder $ \case
 
 -- | Decode a 'Vector' using the given 'Decoder'.
 --
--- >>> decodeByteString (vector int) "[1, 2, 3]"
+-- >>> Decoder.decodeByteString (Decoder.vector Decoder.int) "[1, 2, 3]"
 -- Success [1,2,3]
 vector :: Decoder a -> Decoder (Vector a)
 vector (Decoder d) = Decoder $ \case
@@ -268,10 +287,18 @@ maybe = optional
 -- | Try to decode a value, or return 'Nothing' on 'Null'.
 --
 -- Compared to 'maybe' this 'Decoder' may fail. For example:
--- >>> decodeByteString (nullable int) "true"
--- Error "Error in $: expected Null, but encountered Boolean"
+--
+-- >>> Decoder.decodeByteString (Decoder.nullable Decoder.int) "null"
+-- Success Nothing
+--
+-- >>> Decoder.decodeByteString (Decoder.nullable Decoder.int) "true"
+-- Error "Error in $: parsing Int failed, expected Number, but encountered Boolean"
 nullable :: Decoder a -> Decoder (Maybe a)
-nullable d = Just <$> d <|> Nothing <$ null
+nullable d = Decoder $ \v -> case decode d v of
+  Error s
+    | v == Null -> pure Nothing
+    | otherwise -> fail s
+  Success a -> pure $ Just a
 
 -- | Decoder either an @a@ or @b@. The @b@ 'Decoder' is attempted first.
 either :: Decoder a -> Decoder b -> Decoder (Either a b)
