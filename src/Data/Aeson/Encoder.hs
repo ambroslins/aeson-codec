@@ -90,7 +90,7 @@ module Data.Aeson.Encoder
 
     -- ** Alternatives
     maybe,
-    maybeOrNull,
+    nullable,
     either,
   )
 where
@@ -263,8 +263,6 @@ object kvs =
 
 -- | Encode some @a@ using the projection @a -> b@ and a @'Encoder' b@ at the
 -- given 'Key'.
---
--- See 'object' for more information.
 field :: Key -> Encoder b -> (a -> b) -> KeyValuePair a
 field k e f = KeyValuePair k e (Just . f)
 
@@ -272,10 +270,27 @@ field k e f = KeyValuePair k e (Just . f)
 -- @'Encoder' b@ at the given 'Key'.
 -- If the projection returns 'Nothing' the 'Key' will be absent from the 'Object'.
 --
--- See 'object' for more information.
+-- >>> :{
+-- let maybePair =
+--       Encoder.object
+--         [ Encoder.optionalField "fst" Encoder.bool fst
+--         , Encoder.optionalField "snd" Encoder.int snd
+--         ]
+-- :}
+--
+-- >>> Encoder.encodeByteString maybePair (Just True, Just 42)
+-- "{\"fst\":true,\"snd\":42}"
+--
+-- >>> Encoder.encodeByteString maybePair (Just True, Nothing)
+-- "{\"fst\":true}"
 optionalField :: Key -> Encoder b -> (a -> Maybe b) -> KeyValuePair a
 optionalField = KeyValuePair
 
+-- | Encode some value with an 'Encoder' at the given 'Key'.
+--
+-- >>> let foo = Encoder.object [Encoder.constField "foo" Encoder.int 42]
+-- >>> Encoder.encodeByteString foo ()
+-- "{\"foo\":42}"
 constField :: Key -> Encoder b -> b -> KeyValuePair a
 constField k e x = field k e (const x)
 
@@ -305,9 +320,9 @@ maybe eNothing eJust =
 
 -- | Encode a 'Maybe' value.
 -- This will encode 'Nothing' as 'Null'.
--- @ maybeOrNull = maybe null @
-maybeOrNull :: Encoder a -> Encoder (Maybe a)
-maybeOrNull = maybe null
+-- @ nullable = maybe null @
+nullable :: Encoder a -> Encoder (Maybe a)
+nullable = maybe null
 
 -- | Encode an 'Either' value.
 either :: Encoder a -> Encoder b -> Encoder (Either a b)
