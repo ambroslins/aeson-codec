@@ -37,8 +37,8 @@
 --
 -- And we could use this 'Decoder' to decode a 'ByteString':
 --
--- >>> Decoder.decodeByteString person "{\"name\":\"Naomi\",\"age\":42,\"email\":\"foo@bar.baz\"}"
--- Success (Person {name = "Naomi", age = 42, email = Just "foo@bar.baz"})
+-- >>> Decoder.decodeByteString person "{\"name\":\"John Doe\",\"age\":42,\"email\":\"foo@bar.baz\"}"
+-- Success (Person {name = "John Doe", age = 42, email = Just "foo@bar.baz"})
 module Data.Aeson.Decoder
   ( -- * Decoder
     Decoder (..),

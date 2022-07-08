@@ -37,8 +37,8 @@
 --
 -- And we could use this 'Encoder' to encode some Person to a 'ByteString':
 --
--- >>> Encoder.encodeByteString person (Person "Naomi" 42 (Just "foo@bar.baz"))
--- "{\"name\":\"Naomi\",\"age\":42,\"email\":\"foo@bar.baz\"}"
+-- >>> Encoder.encodeByteString person (Person "John Doe" 42 (Just "foo@bar.baz"))
+-- "{\"name\":\"John Doe\",\"age\":42,\"email\":\"foo@bar.baz\"}"
 module Data.Aeson.Encoder
   ( -- * Encoder
     Encoder (..),
