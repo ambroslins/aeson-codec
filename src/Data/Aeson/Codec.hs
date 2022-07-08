@@ -1,8 +1,59 @@
+-- |
+-- Stability: experimental
+--
+-- A @'Codec' a@ describes a @'Decoder' a@ and an @'Encoder' a@ in a single data type.
+--
+-- It\'s recommended to import this module qualified,
+-- to avoid name clashes with "Prelude" functions.
+--
+-- Here we will use the following import scheme:
+--
+-- @
+-- {-# LANGUAGE ImportQualifiedPost #-}
+-- import Data.Aeson.Codec (Codec)
+-- import Data.Aeson.Codec qualified as Codec
+-- import Data.Aeson.Decoder (Decoder)
+-- import Data.Aeson.Decoder qualified as Decoder
+-- import Data.Aeson.Encoder (Encoder)
+-- import Data.Aeson.Encoder qualified as Encoder
+-- @
+--
+-- Consider the following data type:
+--
+-- >>> :{
+-- data Person = Person
+--   { name :: String
+--   , age :: Int
+--   , email :: Maybe String
+--   }
+--   deriving (Show)
+-- :}
+--
+-- We could write a 'Codec' for this type like this:
+--
+-- >>> :{
+-- personCodec :: Codec Person
+-- personCodec =
+--   Codec.object $ Person
+--     <$> Codec.field "name" Codec.string name
+--     <*> Codec.field "age" Codec.int age
+--     <*> Codec.optionalField "email" Codec.string email
+-- :}
+--
+-- We can define the 'Decoder' and 'Encoder' for @Person@ in terms of this 'Codec'.
+-- >>> personDecoder = Codec.decoder personCodec
+-- >>> personEncoder = Codec.encoder personCodec
+--
+--
+-- >>> Encoder.encodeByteString personEncoder (Person "John Doe" 42 (Just "foo@bar.baz"))
+-- "{\"name\":\"John Doe\",\"age\":42,\"email\":\"foo@bar.baz\"}"
+-- >>> Decoder.decodeByteString personDecoder "{\"name\":\"John Doe\",\"age\":42,\"email\":\"foo@bar.baz\"}"
+-- Success (Person {name = "John Doe", age = 42, email = Just "foo@bar.baz"})
 module Data.Aeson.Codec where
 
 import Data.Aeson qualified as Aeson
-import Data.Aeson.Decoder qualified as Decoder
 import Data.Aeson.Decoder (Decoder (..))
+import Data.Aeson.Decoder qualified as Decoder
 import Data.Aeson.Encoder (Encoder)
 import Data.Aeson.Encoder qualified as Encoder
 import Data.Aeson.Types (Key, Object, Parser, Value (Object))
@@ -10,6 +61,15 @@ import Data.Aeson.Types qualified as Aeson
 import Data.Functor.Contravariant (Contravariant (contramap))
 import Data.Profunctor (Profunctor (dimap))
 import GHC.Generics (Generic, Rep)
+
+-- $setup
+-- >>> :m -Data.Aeson.Codec
+-- >>> import Data.Aeson.Codec (Codec)
+-- >>> import Data.Aeson.Codec qualified as Codec
+-- >>> import Data.Aeson.Decoder (Decoder)
+-- >>> import Data.Aeson.Decoder qualified as Decoder
+-- >>> import Data.Aeson.Encoder (Encoder)
+-- >>> import Data.Aeson.Encoder qualified as Encoder
 
 data Codec a = Codec
   { encoder :: Encoder a,
@@ -80,3 +140,9 @@ generic options =
     { encoder = Encoder.genericWith options,
       decoder = Decoder.genericWith options
     }
+
+int :: Codec Int
+int = auto
+
+string :: Codec String
+string = auto

@@ -27,8 +27,8 @@
 -- We could write an 'Encoder' for this type like this:
 --
 -- >>> :{
--- person :: Encoder Person
--- person = Encoder.object
+-- personEncoder :: Encoder Person
+-- personEncoder = Encoder.object
 --   [ Encoder.field "name" Encoder.string name
 --   , Encoder.field "age" Encoder.int age
 --   , Encoder.optionalField "email" Encoder.string email
@@ -37,7 +37,7 @@
 --
 -- And we could use this 'Encoder' to encode some Person to a 'ByteString':
 --
--- >>> Encoder.encodeByteString person (Person "John Doe" 42 (Just "foo@bar.baz"))
+-- >>> Encoder.encodeByteString personEncoder (Person "John Doe" 42 (Just "foo@bar.baz"))
 -- "{\"name\":\"John Doe\",\"age\":42,\"email\":\"foo@bar.baz\"}"
 module Data.Aeson.Encoder
   ( -- * Encoder

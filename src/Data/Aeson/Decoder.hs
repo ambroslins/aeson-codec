@@ -25,11 +25,11 @@
 --   deriving (Show)
 -- :}
 --
--- We could write an 'Decoder' for this type like this:
+-- We could write a 'Decoder' for this type like this:
 --
 -- >>> :{
--- person :: Decoder Person
--- person = Person
+-- personDecoder :: Decoder Person
+-- personDecoder = Person
 --   <$> Decoder.field "name" Decoder.string
 --   <*> Decoder.field "age" Decoder.int
 --   <*> Decoder.optionalField "email" Decoder.string
@@ -37,7 +37,7 @@
 --
 -- And we could use this 'Decoder' to decode a 'ByteString':
 --
--- >>> Decoder.decodeByteString person "{\"name\":\"John Doe\",\"age\":42,\"email\":\"foo@bar.baz\"}"
+-- >>> Decoder.decodeByteString personDecoder "{\"name\":\"John Doe\",\"age\":42,\"email\":\"foo@bar.baz\"}"
 -- Success (Person {name = "John Doe", age = 42, email = Just "foo@bar.baz"})
 module Data.Aeson.Decoder
   ( -- * Decoder
