@@ -87,6 +87,7 @@ module Data.Aeson.Encoder
     -- ** Arrays
     list,
     vector,
+    nonEmpty,
 
     -- ** Alternatives
     maybe,
@@ -100,6 +101,7 @@ import Data.Aeson qualified as Aeson
 import Data.Aeson.Encoding qualified as Aeson
 import Data.ByteString.Lazy (ByteString)
 import Data.Functor.Contravariant (Contravariant (..))
+import Data.List.NonEmpty (NonEmpty, toList)
 import Data.Maybe (mapMaybe)
 import Data.Scientific (Scientific)
 import Data.Text (Text)
@@ -309,6 +311,10 @@ vector e =
     { toValue = Array . Vector.map (toValue e),
       toEncoding = Aeson.list (toEncoding e) . Vector.toList
     }
+
+-- | Enocde a 'NonEmpty' list using the given 'Encoder.
+nonEmpty :: Encoder a -> Encoder (NonEmpty a)
+nonEmpty = contramap toList . list
 
 -- | Encode a 'Maybe' value.
 maybe :: Encoder () -> Encoder a -> Encoder (Maybe a)
