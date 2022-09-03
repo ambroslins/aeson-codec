@@ -96,7 +96,8 @@ module Data.Aeson.Encoder
   )
 where
 
-import Data.Aeson (Array, Encoding, Key, Value (Array, Null))
+import Data.Aeson (Array, Encoding, Value (Array, Null))
+import Data.Aeson.Compat(Key)
 import Data.Aeson qualified as Aeson
 import Data.Aeson.Encoding qualified as Aeson
 import Data.ByteString.Lazy (ByteString)

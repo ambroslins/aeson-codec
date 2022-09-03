@@ -97,11 +97,12 @@ module Data.Aeson.Codec
 where
 
 import Data.Aeson qualified as Aeson
+import Data.Aeson.Compat(Key)
 import Data.Aeson.Decoder (Decoder (..))
 import Data.Aeson.Decoder qualified as Decoder
 import Data.Aeson.Encoder (Encoder)
 import Data.Aeson.Encoder qualified as Encoder
-import Data.Aeson.Types (Key, Object, Parser, Value (Object))
+import Data.Aeson.Types (Object, Parser, Value (Object))
 import Data.Aeson.Types qualified as Aeson
 import Data.Functor.Contravariant (Contravariant (contramap))
 import Data.List.NonEmpty (NonEmpty)

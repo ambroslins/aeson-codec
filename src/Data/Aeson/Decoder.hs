@@ -106,10 +106,10 @@ import Control.Monad.Trans.Reader (ReaderT (..))
 import Data.Aeson qualified as Aeson
 import Data.Aeson.Internal qualified as Aeson
 import Data.Aeson.Parser.Internal qualified as Aeson
+import Data.Aeson.Compat(Key)
 import Data.Aeson.Types
   ( Array,
     JSONPathElement (Index),
-    Key,
     Object,
     Parser,
     Result (..),

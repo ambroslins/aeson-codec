@@ -46,7 +46,7 @@ common common
 
   build-depends:
     , base >= 4.14.3.0
-    , aeson ^>= 2.0.0.0
+    , aeson
     , transformers
     , text
     , bytestring
@@ -63,7 +63,8 @@ library
     , Data.Aeson.Encoder
 
   -- Modules included in this library but not exported.
-  -- other-modules:
+  other-modules:
+    , Data.Aeson.Compat
 
 test-suite aeson-codec-test
   import:           common
